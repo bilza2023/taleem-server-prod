@@ -1,0 +1,21 @@
+{
+  "tabs": [],
+  "items": [
+    {
+      "type": "page",
+      "contentId": "public-page",
+      "title": "Public Page",
+      "description": "Public page used for testing.",
+      "image": "/content/images/placeholder.webp",
+      "url": "/pages?article=public-page"
+    },
+    {
+      "type": "page",
+      "contentId": "members-page",
+      "title": "Members Page",
+      "description": "Members page used for testing.",
+      "image": "/content/images/placeholder.webp",
+      "url": "/pages?article=members-page"
+    }
+  ]
+}
