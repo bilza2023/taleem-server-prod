@@ -70,7 +70,7 @@ export default class Subscription {
 	// --------------------------------------------------
 
 	async authorize(userId, courseId) {
-
+  debugger;
 		const now = new Date();
 
 		const subscription = await this.kernel.db.subscription.findFirst({

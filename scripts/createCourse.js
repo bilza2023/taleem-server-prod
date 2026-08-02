@@ -1,7 +1,7 @@
 // --------------------------------------------------
 // Configuration
 // --------------------------------------------------
-
+///home/bilal-tariq/00--TALEEM/taleem-server-prod/scripts/createCourse.js
 import kernel from "../src/serverKernel/ServerKernel.js";
 
 const slug = "blog";
