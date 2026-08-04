@@ -97,6 +97,7 @@ model Library {
   type ContentType
 
   body String?
+  source String?
 
   courseId           Int
   sortOrder          Int           @default(0)
