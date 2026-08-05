@@ -1,4 +1,4 @@
-// routes/communication.js
+// /home/bilal-tariq/00--TALEEM/taleem-server-prod/routes/communication.js
 import { getToken } from "./utils/getToken.js";
 import express from "express";
 import kernel from "../src/serverKernel/ServerKernel.js";
@@ -16,6 +16,9 @@ router.post("/", async (req, res) => {
 		const token = getToken(req);
 
 		const user = await kernel.auth.authenticate(token);
+
+		await kernel.communicationPolicy.require(user);
+
 		const librarySlug = req.body.librarySlug;
 		const libraryId = await kernel.library.slugToId(librarySlug);
 		// throw if no library id
@@ -40,27 +43,39 @@ router.post("/", async (req, res) => {
 		res.status(201).json(item);
 
 	}
-	catch (error) {
+catch (error) {
 
-		const message = error.message.toLowerCase();
-		 console.error(error);
-		if (
-			message.includes("authenticate") ||
-			message.includes("token")
-		) {
+	// console.error(error);
 
-			return res.status(401).json({
-				error: "login_required"
-			});
+	const message = error.message.toLowerCase();
 
-		}
+	if (
+		message.includes("authenticate") ||
+		message.includes("token")
+	) {
 
-		return res.status(500).json({
-			error: "server_error"
+		return res.status(401).json({
+			error: "login_required"
 		});
 
 	}
 
+	if (
+		message.includes("maximum") &&
+		message.includes("question")
+	) {
+
+		return res.status(429).json({
+			error: "too_many_open_questions"
+		});
+
+	}
+
+	return res.status(500).json({
+		error: "server_error"
+	});
+
+}
 });
 
 // --------------------------------------------------

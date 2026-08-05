@@ -1,4 +1,4 @@
-// routes/media.js
+// /home/bilal-tariq/00--TALEEM/taleem-server-prod/routes/media.js
 
 import express from "express";
 import fs from "fs";

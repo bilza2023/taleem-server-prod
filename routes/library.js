@@ -1,4 +1,4 @@
-// /routes/library.js
+// /home/bilal-tariq/00--TALEEM/taleem-server-prod/routes/library.js
 
 import express from "express";
 import kernel from "../src/serverKernel/ServerKernel.js";
@@ -113,7 +113,9 @@ router.get("/:slug", async (req, res) => {
 			req.params.slug
 		);
 
-		const item = await kernel.library.get(id);
+		const item = await kernel.library.get(id, {
+			status: "PUBLISHED"
+		});
 
 		if (!item) {
 

@@ -72,6 +72,30 @@ router.post("/login", async (req, res) => {
 // Library API
 // --------------------------------------------------
 
+router.get("/library", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(getToken(req));
+
+		const courseId = await kernel.course.slugToId(req.query.course);
+
+		await kernel.policy.require(admin,courseId,"library");
+
+		const items = await kernel.library.list({course: req.query.course,type: req.query.type});
+
+		res.json(items);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
 router.get("/library/:slug", async (req, res) => {
 
 	try {

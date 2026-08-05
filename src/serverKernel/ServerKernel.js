@@ -6,6 +6,7 @@ import JWT from "./JWT.js";
 import Auth from "./Auth.js";
 import Logger from "./Logger.js";
 import Policy from "./policy.js";
+import CommunicationPolicy from "./CommunicationPolicy.js";
 import User from "./modules/User.js";
 import Admin from "./modules/Admin.js";
 import Library from "./modules/Library.js";
@@ -40,6 +41,7 @@ class ServerKernel {
 			this.auth = this.initialize("Auth", () => new Auth(this));
 
 			this.policy = this.initialize("Policy", () => new Policy(this));
+			this.communicationPolicy = this.initialize("CommunicationPolicy", () => new CommunicationPolicy(this));
 			// --------------------------------------------------
 			// Modules
 			// --------------------------------------------------

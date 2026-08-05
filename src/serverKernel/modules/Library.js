@@ -1,4 +1,4 @@
-// src/serverKernel/modules/Library.js
+// /home/bilal-tariq/00--TALEEM/taleem-server-prod/src/serverKernel/modules/Library.js
 
 export default class Library {
 
@@ -6,82 +6,92 @@ export default class Library {
 		this.kernel = kernel;
 	}
 
-	// --------------------------------------------------
-	// Queries
-	// --------------------------------------------------
+// --------------------------------------------------
+// Queries
+// --------------------------------------------------
 
-	async list(filters = {}) {
+async list(filters = {}) {
 
-		const where = {};
+	const where = {};
 
-		if (filters.type) {
-			where.type = filters.type;
+	if (filters.type) {
+		where.type = filters.type;
+	}
+
+	if (filters.status) {
+		where.status = filters.status;
+	}
+
+	if (filters.course || filters.access) {
+
+		where.course = {};
+
+		if (filters.course) {
+			where.course.slug = filters.course;
 		}
 
-		if (filters.course || filters.access) {
-
-			where.course = {};
-
-			if (filters.course) {
-				where.course.slug = filters.course;
-			}
-
-			if (filters.access) {
-				where.course.access = filters.access;
-			}
-
+		if (filters.access) {
+			where.course.access = filters.access;
 		}
-
-		return this.kernel.db.library.findMany({
-
-			where,
-
-			select: {
-
-				id: true,
-				slug: true,
-				title: true,
-				thumbnail: true,
-				type: true,
-				createdAt: true,
-				updatedAt: true,
-
-				course: {
-					select: {
-						id: true,
-						slug: true,
-						access: true
-					}
-				}
-
-			}
-
-		});
 
 	}
 
-	async get(id) {
+	return this.kernel.db.library.findMany({
 
-		return this.kernel.db.library.findUnique({
+		where,
 
-			where: { id },
+		select: {
 
-			include: {
+			id: true,
+			slug: true,
+			title: true,
+			thumbnail: true,
+			type: true,
+			status: true,
+			createdAt: true,
+			updatedAt: true,
 
-				course: {
-					select: {
-						id: true,
-						slug: true,
-						access: true
-					}
+			course: {
+				select: {
+					id: true,
+					slug: true,
+					access: true
 				}
-
 			}
 
-		});
+		}
 
+	});
+
+}
+
+async get(id, filters = {}) {
+
+	const where = { id };
+
+	if (filters.status) {
+		where.status = filters.status;
 	}
 
+	return this.kernel.db.library.findFirst({
+
+		where,
+
+		include: {
+
+			course: {
+				select: {
+					id: true,
+					slug: true,
+					access: true
+				}
+			}
+
+		}
+
+	});
+
+}
 	// --------------------------------------------------
 	// CRUD
 	// --------------------------------------------------

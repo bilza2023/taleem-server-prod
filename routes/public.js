@@ -1,4 +1,4 @@
-// routes/public.js
+// /home/bilal-tariq/00--TALEEM/taleem-server-prod/routes/public.js
 
 import express from "express";
 import kernel from "../src/serverKernel/ServerKernel.js";
@@ -36,27 +36,27 @@ router.get("/course", async (req, res) => {
 	}
 
 });
-
 // --------------------------------------------------
 // GET /api/public/library
-// List public library items
+// List published library items
 //
 // Examples:
 //   /library
 //   /library?course=pre-algebra
 //   /library?type=ARTICLE
-//   /library?access=PUBLIC
+//   /library?access=OPEN
 // --------------------------------------------------
 
 router.get("/library", async (req, res) => {
 
 	try {
-	// console.log(req.query);
+
 		const items = await kernel.library.list({
 
 			course: req.query.course,
 			type: req.query.type,
-			access: req.query.access
+			access: req.query.access,
+			status: "PUBLISHED"
 
 		});
 
@@ -64,7 +64,9 @@ router.get("/library", async (req, res) => {
 
 	}
 	catch (error) {
-		console.log("library",error)
+
+		console.log("library", error);
+
 		res.status(500).json({
 			error: error.message
 		});
@@ -72,5 +74,4 @@ router.get("/library", async (req, res) => {
 	}
 
 });
-
 export default router;

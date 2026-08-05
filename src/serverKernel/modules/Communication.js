@@ -138,4 +138,29 @@ async listUnanswered(courseId) {
 
 }
 
+
+// --------------------------------------------------
+// Count unanswered questions for one user.
+// --------------------------------------------------
+
+async countUserOpenQuestions(userId) {
+
+	return this.kernel.db.communication.count({
+
+		where: {
+
+			userId,
+
+			OR: [
+				{ authorResponse: null },
+				{ authorResponse: "" }
+			]
+
+		}
+
+	});
+
 }
+
+
+}//
