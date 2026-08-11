@@ -145,7 +145,9 @@ router.put("/library/:slug", async (req, res) => {
 
 	try {
 
-       console.log("req.params" , req.params);
+	// console.log("req.body",req.body);
+	
+    //    console.log("req.params" , req.params);
 		const admin = await kernel.auth.authenticate(getToken(req));
 
 		const id = await kernel.library.slugToId(req.params.slug);
@@ -156,7 +158,8 @@ router.put("/library/:slug", async (req, res) => {
 		delete req.body.courseSlug;
 		
 		// req.body.courseId = library.course.id;
-
+		  
+	  
 		res.json(await kernel.library.update(id, req.body));
 
 	}

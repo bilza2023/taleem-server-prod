@@ -66,7 +66,7 @@ async list(filters = {}) {
 }
 
 async get(id, filters = {}) {
-
+// debugger;
 	const where = { id };
 
 	if (filters.status) {
@@ -105,6 +105,7 @@ async get(id, filters = {}) {
 	}
 
 	async update(id, data) {
+  
 
 		return this.kernel.db.library.update({
 
