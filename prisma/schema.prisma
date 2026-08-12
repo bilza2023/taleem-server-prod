@@ -81,36 +81,46 @@ model Course {
   library       Library[]
   subscriptions Subscription[]
   adminPolicies AdminCoursePolicy[]
+  groupings     Grouping[]
 }
 
 model Library {
-  id Int @id @default(autoincrement())
-
-  slug String @unique
-
-  title String
-
-  description String?
-
-  thumbnail String?
-
-  type ContentType
-
-  body String?
-  source String?
-
+  id                 Int           @id @default(autoincrement())
+  slug               String        @unique
+  title              String
+  description        String?
+  thumbnail          String?
+  type               ContentType
+  body               String?
   courseId           Int
   sortOrder          Int           @default(0)
   allowCommunication Boolean       @default(true)
   status             LibraryStatus @default(DRAFT)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   course         Course          @relation(fields: [courseId], references: [id])
   communications Communication[]
 
+  groupingId Int
+ grouping Grouping @relation(fields: [groupingId, courseId], references: [id, courseId])
+
   @@index([slug])
+  @@index([courseId])
+}
+
+model Grouping {
+  id        Int    @id @default(autoincrement())
+  courseId  Int
+  slug      String
+  title     String
+  sortOrder Int    @default(0)
+
+  course  Course    @relation(fields: [courseId], references: [id])
+  lessons Library[]
+
+  @@unique([id, courseId])
+  @@unique([courseId, slug])
   @@index([courseId])
 }
 
