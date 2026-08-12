@@ -13,6 +13,8 @@ import Library from "./modules/Library.js";
 import Course from "./modules/Course.js";
 import Communication from "./modules/Communication.js";
 import Subscription from "./modules/Subscription.js";
+import Groupings from "./modules/Groupings.js";
+import AdminCoursePolicy from "./modules/AdminCoursePolicy.js";
 import Image from "./modules/Image.js";
 import Audio from "./modules/Audio.js";
 
@@ -56,9 +58,10 @@ class ServerKernel {
 			this.image = this.initialize("Image", () => new Image(this));
 
 			this.audio = this.initialize("Audio", () => new Audio(this));
-
+			this.groupings = this.initialize("Groupings", () => new Groupings(this));
 			this.communication = this.initialize("Communication", () => new Communication(this));
 			this.subscription = this.initialize("Subscription", () => new Subscription(this));
+			this.adminCoursePolicy = this.initialize("AdminCoursePolicy", () => new AdminCoursePolicy(this));
 
 			this.logger.info("Server Kernel started successfully.");
 

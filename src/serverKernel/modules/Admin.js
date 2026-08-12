@@ -1,5 +1,6 @@
 // src/serverKernel/modules/Admin.js
 // - sont expose this file it is for super-admin which we dont have for now
+///home/bilal-tariq/00--TALEEM/taleem-server-prod/src/serverKernel/modules/Admin.js
 import bcrypt from "bcrypt";
 
 export default class Admin {
@@ -98,5 +99,23 @@ export default class Admin {
 		});
 
 	}
+	// --------------------------------------------------
+// Utilities
+// --------------------------------------------------
+
+async emailToId(email) {
+
+	const admin = await this.kernel.db.admin.findUnique({
+		where: { email },
+		select: { id: true }
+	});
+
+	if (!admin) {
+		throw new Error(`Admin "${email}" not found.`);
+	}
+
+	return admin.id;
+
+}
 
 }

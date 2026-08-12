@@ -409,4 +409,157 @@ router.post("/subscription", async (req, res) => {
 	}
 
 });
+
+// --------------------------------------------------
+// Grouping API
+// --------------------------------------------------
+
+router.get("/grouping", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(getToken(req));
+
+		const courseId = await kernel.course.slugToId(
+			req.query.course
+		);
+
+		await kernel.policy.require(
+			admin,
+			courseId,
+			"library"
+		);
+
+		res.json(
+			await kernel.groupings.list({ courseId })
+		);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+
+router.post("/grouping", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(getToken(req));
+
+		const courseId = await kernel.course.slugToId(
+			req.body.courseSlug
+		);
+
+		await kernel.policy.require(
+			admin,
+			courseId,
+			"library"
+		);
+
+		res.status(201).json(
+
+			await kernel.groupings.create({
+
+				courseId,
+				slug: req.body.slug,
+				title: req.body.title,
+				sortOrder: req.body.sortOrder ?? 0
+
+			})
+
+		);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+
+router.put("/grouping/:id", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(getToken(req));
+
+		const grouping = await kernel.groupings.get(
+			Number(req.params.id)
+		);
+
+		await kernel.policy.require(
+			admin,
+			grouping.courseId,
+			"library"
+		);
+
+		res.json(
+
+			await kernel.groupings.update(
+				grouping.id,
+				{
+					slug: req.body.slug,
+					title: req.body.title,
+					sortOrder: req.body.sortOrder
+				}
+			)
+
+		);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+
+router.delete("/grouping/:id", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(getToken(req));
+
+		const grouping = await kernel.groupings.get(
+			Number(req.params.id)
+		);
+
+		await kernel.policy.require(
+			admin,
+			grouping.courseId,
+			"library"
+		);
+
+		await kernel.groupings.delete(
+			grouping.id
+		);
+
+		res.json({
+			success: true
+		});
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
 export default router;
