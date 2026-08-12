@@ -74,4 +74,39 @@ router.get("/library", async (req, res) => {
 	}
 
 });
+
+// --------------------------------------------------
+// GET /api/public/grouping
+// List groupings for a course
+//
+// Example:
+//   /grouping?course=blog
+// --------------------------------------------------
+
+router.get("/grouping", async (req, res) => {
+
+	try {
+
+		const courseId = await kernel.course.slugToId(
+			req.query.course
+		);
+
+		const groupings = await kernel.groupings.list({
+			courseId
+		});
+
+		res.json(groupings);
+
+	}
+	catch (error) {
+
+		console.log("grouping", error);
+
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
 export default router;

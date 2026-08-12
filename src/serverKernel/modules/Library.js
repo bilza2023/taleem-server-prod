@@ -66,7 +66,7 @@ async list(filters = {}) {
 }
 
 async get(id, filters = {}) {
-// debugger;
+
 	const where = { id };
 
 	if (filters.status) {
@@ -84,6 +84,15 @@ async get(id, filters = {}) {
 					id: true,
 					slug: true,
 					access: true
+				}
+			},
+
+			grouping: {
+				select: {
+					id: true,
+					slug: true,
+					title: true,
+					sortOrder: true
 				}
 			}
 

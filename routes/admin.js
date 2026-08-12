@@ -121,51 +121,107 @@ router.get("/library/:slug", async (req, res) => {
 router.post("/library", async (req, res) => {
 
 	try {
-// console.log(req.body);
-// console.log("courseSlug =", req.body.courseSlug);
-//  debugger;
-		const admin = await kernel.auth.authenticate(getToken(req));
 
-		const courseSlug = req.body.courseSlug
-		const courseId = await kernel.course.slugToId(courseSlug);
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
 
-		req.body.courseId = courseId;
-		delete req.body.courseSlug;
+		const courseId = await kernel.course.slugToId(
+			req.body.courseSlug
+		);
 
-		await kernel.policy.require(admin, courseId, "library");
+		await kernel.policy.require(
+			admin,
+			courseId,
+			"library"
+		);
 
-		res.status(201).json(await kernel.library.create(req.body));
+		res.status(201).json(
 
-	}
-	catch (error) {res.status(500).json({ error: error.message });}
+			await kernel.library.create({
 
-});
+				slug: req.body.slug,
+				title: req.body.title,
+				description: req.body.description,
+				type: req.body.type,
+				body: req.body.body,
+				thumbnail: req.body.thumbnail,
 
-router.put("/library/:slug", async (req, res) => {
+				course: {
+					connect: {
+						id: courseId
+					}
+				},
 
-	try {
+				grouping: {
+					connect: {
+						id: Number(req.body.groupingId)
+					}
+				}
 
-	// console.log("req.body",req.body);
-	
-    //    console.log("req.params" , req.params);
-		const admin = await kernel.auth.authenticate(getToken(req));
+			})
 
-		const id = await kernel.library.slugToId(req.params.slug);
-		const library = await kernel.library.get(id);
-
-		await kernel.policy.require(admin, library.course.id, "library");
-		// const data = req.body;
-		delete req.body.courseSlug;
-		
-		// req.body.courseId = library.course.id;
-		  
-	  
-		res.json(await kernel.library.update(id, req.body));
+		);
 
 	}
 	catch (error) {
 
-		res.status(500).json({ error: error.message });
+		res.status(500).json({
+			error: error.message
+		});
+
+	}
+
+});
+router.put("/library/:slug", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
+
+		const id = await kernel.library.slugToId(
+			req.params.slug
+		);
+
+		const library = await kernel.library.get(id);
+
+		await kernel.policy.require(
+			admin,
+			library.course.id,
+			"library"
+		);
+
+		const data = {
+
+			slug: req.body.slug,
+			title: req.body.title,
+			description: req.body.description,
+			type: req.body.type,
+			body: req.body.body,
+			thumbnail: req.body.thumbnail,
+			allowCommunication: req.body.allowCommunication,
+			status: req.body.status,
+
+			grouping: {
+				connect: {
+					id: Number(req.body.groupingId)
+				}
+			}
+
+		};
+
+		res.json(
+			await kernel.library.update(id, data)
+		);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: error.message
+		});
 
 	}
 
