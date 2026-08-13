@@ -9,7 +9,6 @@ export default class Library {
 // --------------------------------------------------
 // Queries
 // --------------------------------------------------
-
 async list(filters = {}) {
 
 	const where = {};
@@ -56,6 +55,15 @@ async list(filters = {}) {
 					id: true,
 					slug: true,
 					access: true
+				}
+			},
+
+			grouping: {
+				select: {
+					id: true,
+					slug: true,
+					title: true,
+					sortOrder: true
 				}
 			}
 
