@@ -6,7 +6,7 @@ import kernel from "../src/serverKernel/ServerKernel.js";
 
 
 const adminEmail = "bilal@taleem.help";
-const courseSlug = "blog";
+const courseSlug = "fbise9math";
 
 
 const library = true;

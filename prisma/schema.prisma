@@ -84,6 +84,21 @@ model Course {
   groupings     Grouping[]
 }
 
+model Grouping {
+  id        Int    @id @default(autoincrement())
+  courseId  Int
+  slug      String
+  title     String
+  sortOrder Int    @default(0)
+
+  course  Course    @relation(fields: [courseId], references: [id])
+  lessons Library[]
+
+  @@unique([id, courseId])
+  @@unique([courseId, slug])
+  @@index([courseId])
+}
+
 model Library {
   id                 Int           @id @default(autoincrement())
   slug               String        @unique
@@ -106,21 +121,6 @@ model Library {
  grouping Grouping @relation(fields: [groupingId, courseId], references: [id, courseId])
 
   @@index([slug])
-  @@index([courseId])
-}
-
-model Grouping {
-  id        Int    @id @default(autoincrement())
-  courseId  Int
-  slug      String
-  title     String
-  sortOrder Int    @default(0)
-
-  course  Course    @relation(fields: [courseId], references: [id])
-  lessons Library[]
-
-  @@unique([id, courseId])
-  @@unique([courseId, slug])
   @@index([courseId])
 }
 
