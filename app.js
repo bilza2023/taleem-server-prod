@@ -4,10 +4,6 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// import adminPagesRouter from "./routes/admin-pages.js";
-// import libraryRouter from "./routes/library.js";
-// import communicationRouter from "./routes/communication.js";
-// import mediaRouter from "./routes/media.js";
 import publicRouter from "./routes/public.js";
 import adminRouter from "./routes/admin.js";
 import userRouter from "./routes/user.js";

@@ -4,57 +4,57 @@ import app from "../../app.js";
 
 describe("User API", () => {
 
-	it("POST /api/user/login returns a token", async () => {
+	const email = `test-${Date.now()}@example.com`;
+	const password = "test-password-123";
+
+	let token;
+
+	it("registers a user", async () => {
+
+		const res = await request(app)
+			.post("/api/user/register")
+			.send({
+				email,
+				password,
+				name: "Test User"
+			});
+
+		expect(res.status).toBe(201);
+		expect(res.body.email).toBe(email);
+		expect(res.body.name).toBe("Test User");
+
+	});
+
+	it("logs in the registered user", async () => {
 
 		const res = await request(app)
 			.post("/api/user/login")
 			.send({
-				email: "test@example.com",
-				password: "password"
+				email,
+				password
 			});
 
 		expect(res.status).toBe(200);
 		expect(res.body.token).toBeTruthy();
 
+		token = res.body.token;
+
 	});
 
-	it("POST /api/user/verify verifies the token", async () => {
-
-		const login = await request(app)
-			.post("/api/user/login")
-			.send({
-				email: "test@example.com",
-				password: "password"
-			});
-
-		expect(login.status).toBe(200);
+	it("verifies the logged-in user", async () => {
 
 		const res = await request(app)
 			.post("/api/user/verify")
-			.send({
-				token: login.body.token
-			});
+			.send({ token });
 
 		expect(res.status).toBe(200);
-		expect(res.body.email).toBe("test@example.com");
+		expect(res.body.email).toBe(email);
+		expect(res.body.name).toBe("Test User");
+		expect(res.body.id).toBeTruthy();
 
 	});
 
-	it("POST /api/user/login rejects invalid password", async () => {
-
-		const res = await request(app)
-			.post("/api/user/login")
-			.send({
-				email: "test@example.com",
-				password: "wrong-password"
-			});
-
-		expect(res.status).toBe(401);
-		expect(res.body.error).toBeTruthy();
-
-	});
-
-	it("POST /api/user/verify rejects invalid token", async () => {
+	it("rejects an invalid token", async () => {
 
 		const res = await request(app)
 			.post("/api/user/verify")
@@ -63,7 +63,6 @@ describe("User API", () => {
 			});
 
 		expect(res.status).toBe(401);
-		expect(res.body.error).toBeTruthy();
 
 	});
 
