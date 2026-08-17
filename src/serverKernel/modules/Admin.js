@@ -1,6 +1,3 @@
-// src/serverKernel/modules/Admin.js
-// - sont expose this file it is for super-admin which we dont have for now
-///home/bilal-tariq/00--TALEEM/taleem-server-prod/src/serverKernel/modules/Admin.js
 import bcrypt from "bcrypt";
 
 export default class Admin {
@@ -8,10 +5,6 @@ export default class Admin {
 	constructor(kernel) {
 		this.kernel = kernel;
 	}
-
-	// --------------------------------------------------
-	// Queries
-	// --------------------------------------------------
 
 	async list(filters = {}) {
 
@@ -34,10 +27,6 @@ export default class Admin {
 		});
 
 	}
-
-	// --------------------------------------------------
-	// Authentication
-	// --------------------------------------------------
 
 	async login(email, password) {
 
@@ -62,10 +51,6 @@ export default class Admin {
 		return this.kernel.auth.createAdminToken(admin);
 
 	}
-
-	// --------------------------------------------------
-	// CRUD
-	// --------------------------------------------------
 
 	async create(data) {
 
@@ -99,23 +84,27 @@ export default class Admin {
 		});
 
 	}
-	// --------------------------------------------------
-// Utilities
-// --------------------------------------------------
 
-async emailToId(email) {
+	async emailToId(email) {
 
-	const admin = await this.kernel.db.admin.findUnique({
-		where: { email },
-		select: { id: true }
-	});
+		const admin = await this.kernel.db.admin.findUnique({
+			where: { email },
+			select: { id: true }
+		});
 
-	if (!admin) {
-		throw new Error(`Admin "${email}" not found.`);
+		if (!admin) {
+			throw new Error(`Admin "${email}" not found.`);
+		}
+
+		return admin.id;
+
 	}
+	async isAdmin(courseSlug) {
 
-	return admin.id;
+	const courseSlugs = JSON.parse(this.courseSlugs || "[]");
 
-}
+	return courseSlugs.includes(courseSlug);
+
+	}
 
 }

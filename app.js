@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import userRouter from "./routes/user.js";
-import adminRouter from "./routes/admin.js";
-import adminPagesRouter from "./routes/admin-pages.js";
+// import adminPagesRouter from "./routes/admin-pages.js";
+// import libraryRouter from "./routes/library.js";
+// import communicationRouter from "./routes/communication.js";
+// import mediaRouter from "./routes/media.js";
 import publicRouter from "./routes/public.js";
-import libraryRouter from "./routes/library.js";
-import communicationRouter from "./routes/communication.js";
-import mediaRouter from "./routes/media.js";
+import adminRouter from "./routes/admin.js";
+import userRouter from "./routes/user.js";
 
 dotenv.config();
 
@@ -111,9 +111,5 @@ app.get("/api/health", (req, res) => {
 app.use("/api/public", publicRouter);
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
-app.use("/api/admin/pages", adminPagesRouter);
-app.use("/api/library", libraryRouter);
-app.use("/api/communication", communicationRouter);
-app.use("/api/media", mediaRouter);
 
 export default app;

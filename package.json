@@ -11,7 +11,7 @@
     "wipe": "node scripts/clean-db.js",
     "test:kernel": "npm run seed && vitest run tests/kernel",
     "test:routes": "npm run seed && vitest run tests/routes",
-    "test": "npm run test:kernel && npm run test:routes"
+    "test": "vitest"
   },
   "author": "Bilal Tariq",
   "license": "ISC",

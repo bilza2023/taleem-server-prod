@@ -1,74 +1,89 @@
-// /home/bilal-tariq/00--TALEEM/taleem-server-prod/routes/public.js
 
 import express from "express";
 import kernel from "../src/serverKernel/ServerKernel.js";
+import getToken from "../content/js/getToken.js";
 
 const router = express.Router();
 
 // --------------------------------------------------
-// GET /api/public/course
-// List public courses
-//
-// Examples:
-//   /course
-//   /course?access=PUBLIC
+// Courses
 // --------------------------------------------------
 
 router.get("/course", async (req, res) => {
 
 	try {
 
-		const courses = await kernel.course.list({
-
-			access: req.query.access
-
-		});
+		const courses = await kernel.course.list();
 
 		res.json(courses);
 
 	}
 	catch (error) {
-		console.log("library",error)
+
 		res.status(500).json({
-			error: error.message
+			error: "server_error"
 		});
 
 	}
 
 });
-// --------------------------------------------------
-// GET /api/public/library
-// List published library items
-//
-// Examples:
-//   /library
-//   /library?course=pre-algebra
-//   /library?type=ARTICLE
-//   /library?access=OPEN
-// --------------------------------------------------
 
-router.get("/library", async (req, res) => {
+router.get("/course/:slug", async (req, res) => {
 
 	try {
 
-		const items = await kernel.library.list({
+		const course = await kernel.course.get(
+			req.params.slug
+		);
 
-			course: req.query.course,
-			type: req.query.type,
-			access: req.query.access,
-			status: "PUBLISHED"
+		if (!course) {
+			return res.status(404).json({
+				error: "course_not_found"
+			});
+		}
 
+		res.json(course);
+
+	}
+	catch (error) {
+
+		res.status(500).json({
+			error: "server_error"
 		});
+
+	}
+
+});
+
+// --------------------------------------------------
+// Course Library
+// --------------------------------------------------
+
+router.get("/course/:slug/list", async (req, res) => {
+
+	try {
+
+		const course = await kernel.course.get(
+			req.params.slug
+		);
+
+		if (!course) {
+			return res.status(404).json({
+				error: "course_not_found"
+			});
+		}
+
+		const items = await kernel.library.listByCourse(
+			req.params.slug
+		);
 
 		res.json(items);
 
 	}
 	catch (error) {
 
-		console.log("library", error);
-
 		res.status(500).json({
-			error: error.message
+			error: "server_error"
 		});
 
 	}
@@ -76,37 +91,166 @@ router.get("/library", async (req, res) => {
 });
 
 // --------------------------------------------------
-// GET /api/public/grouping
-// List groupings for a course
-//
-// Example:
-//   /grouping?course=blog
+// Library Item
 // --------------------------------------------------
 
-router.get("/grouping", async (req, res) => {
+router.get("/library/:slug", async (req, res) => {
 
 	try {
 
-		const courseId = await kernel.course.slugToId(
-			req.query.course
+		const item = await kernel.library.get(
+			req.params.slug
 		);
 
-		const groupings = await kernel.groupings.list({
-			courseId
-		});
+		if (!item) {
+			return res.status(404).json({
+				error: "library_not_found"
+			});
+		}
 
-		res.json(groupings);
+		const course = await kernel.course.get(
+			item.courseSlug
+		);
+
+		if (!course) {
+			return res.status(404).json({
+				error: "course_not_found"
+			});
+		}
+
+		if (course.access !== "OPEN") {
+
+			const token = getToken(req);
+
+			const user = await kernel.auth.authenticate(token);
+
+			if (course.access === "SUBSCRIPTION") {
+
+				await kernel.subscription.authorize(
+					user.id,
+					item.courseSlug
+				);
+
+			}
+
+		}
+
+		res.json(item);
 
 	}
 	catch (error) {
 
-		console.log("grouping", error);
+		const message = error.message.toLowerCase();
+
+		if (
+			message.includes("authenticate") ||
+			message.includes("token")
+		) {
+
+			return res.status(401).json({
+				error: "login_required"
+			});
+
+		}
+
+		if (message.includes("subscription")) {
+
+			return res.status(403).json({
+				error: "subscription_required"
+			});
+
+		}
 
 		res.status(500).json({
-			error: error.message
+			error: "server_error"
 		});
 
 	}
 
 });
+
+// --------------------------------------------------
+// Library Discussion
+// --------------------------------------------------
+
+router.get("/library/:slug/discussion", async (req, res) => {
+
+	try {
+
+		const item = await kernel.library.get(
+			req.params.slug
+		);
+
+		if (!item) {
+			return res.status(404).json({
+				error: "library_not_found"
+			});
+		}
+
+		const course = await kernel.course.get(
+			item.courseSlug
+		);
+
+		if (!course) {
+			return res.status(404).json({
+				error: "course_not_found"
+			});
+		}
+
+		if (course.access !== "OPEN") {
+
+			const token = getToken(req);
+
+			const user = await kernel.auth.authenticate(token);
+
+			if (course.access === "SUBSCRIPTION") {
+
+				await kernel.subscription.authorize(
+					user.id,
+					item.courseSlug
+				);
+
+			}
+
+		}
+
+		const discussion =
+			await kernel.communication.list({
+				librarySlug: item.slug
+			});
+
+		res.json(discussion);
+
+	}
+	catch (error) {
+
+		const message = error.message.toLowerCase();
+
+		if (
+			message.includes("authenticate") ||
+			message.includes("token")
+		) {
+
+			return res.status(401).json({
+				error: "login_required"
+			});
+
+		}
+
+		if (message.includes("subscription")) {
+
+			return res.status(403).json({
+				error: "subscription_required"
+			});
+
+		}
+
+		res.status(500).json({
+			error: "server_error"
+		});
+
+	}
+
+});
+
 export default router;

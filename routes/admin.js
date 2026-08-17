@@ -1,5 +1,3 @@
-// /home/bilal-tariq/00--TALEEM/taleem-server/routes/admin.js
-
 import express from "express";
 import kernel from "../src/serverKernel/ServerKernel.js";
 import getToken from "../content/js/getToken.js";
@@ -7,46 +5,8 @@ import getToken from "../content/js/getToken.js";
 const router = express.Router();
 
 // --------------------------------------------------
-// Dashboard
+// Authentication
 // --------------------------------------------------
-
-router.get("/courses", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		res.json(await kernel.policy.listCourses(admin));
-
-	}
-	catch (error) {
-
-		res.status(401).json({ error: error.message });
-
-	}
-
-});
-
-router.get("/verify", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		res.json({
-			id: admin.id,
-			email: admin.email,
-			name: admin.name
-		});
-
-	}
-	catch (error) {
-
-		res.status(401).json({ error: error.message });
-
-	}
-
-});
 
 router.post("/login", async (req, res) => {
 
@@ -62,63 +22,15 @@ router.post("/login", async (req, res) => {
 	}
 	catch (error) {
 
-		res.status(401).json({ error: error.message });
-
-	}
-
-});
-
-// --------------------------------------------------
-// Library API
-// --------------------------------------------------
-
-router.get("/library", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const courseId = await kernel.course.slugToId(req.query.course);
-
-		await kernel.policy.require(admin,courseId,"library");
-
-		const items = await kernel.library.list({course: req.query.course,type: req.query.type});
-
-		res.json(items);
-
-	}
-	catch (error) {
-
-		res.status(500).json({
+		res.status(401).json({
 			error: error.message
 		});
 
 	}
 
 });
-router.get("/library/:slug", async (req, res) => {
 
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const id = await kernel.library.slugToId(req.params.slug);
-		const library = await kernel.library.get(id);
-
-		await kernel.policy.require(admin, library.course.id, "library");
-
-		res.json(library);
-
-	}
-	catch (error) {
-
-		res.status(404).json({ error: error.message });
-
-	}
-
-});
-
-router.post("/library", async (req, res) => {
+router.get("/verify", async (req, res) => {
 
 	try {
 
@@ -126,54 +38,29 @@ router.post("/library", async (req, res) => {
 			getToken(req)
 		);
 
-		const courseId = await kernel.course.slugToId(
-			req.body.courseSlug
-		);
-
-		await kernel.policy.require(
-			admin,
-			courseId,
-			"library"
-		);
-
-		res.status(201).json(
-
-			await kernel.library.create({
-
-				slug: req.body.slug,
-				title: req.body.title,
-				description: req.body.description,
-				type: req.body.type,
-				body: req.body.body,
-				thumbnail: req.body.thumbnail,
-
-				course: {
-					connect: {
-						id: courseId
-					}
-				},
-
-				grouping: {
-					connect: {
-						id: Number(req.body.groupingId)
-					}
-				}
-
-			})
-
-		);
+		res.json({
+			id: admin.id,
+			email: admin.email,
+			courseSlugs: admin.courseSlugs,
+			isActive: admin.isActive
+		});
 
 	}
 	catch (error) {
 
-		res.status(500).json({
+		res.status(401).json({
 			error: error.message
 		});
 
 	}
 
 });
-router.put("/library/:slug", async (req, res) => {
+
+// --------------------------------------------------
+// Courses
+// --------------------------------------------------
+
+router.get("/courses", async (req, res) => {
 
 	try {
 
@@ -181,255 +68,191 @@ router.put("/library/:slug", async (req, res) => {
 			getToken(req)
 		);
 
-		const id = await kernel.library.slugToId(
-			req.params.slug
+		const courses = await kernel.course.list();
+
+		const allowed = courses.filter(course =>
+			kernel.admin.isAdmin(admin, course.slug)
 		);
 
-		const library = await kernel.library.get(id);
-
-		await kernel.policy.require(
-			admin,
-			library.course.id,
-			"library"
-		);
-
-		const data = {
-
-			slug: req.body.slug,
-			title: req.body.title,
-			description: req.body.description,
-			type: req.body.type,
-			body: req.body.body,
-			thumbnail: req.body.thumbnail,
-			allowCommunication: req.body.allowCommunication,
-			status: req.body.status,
-
-			grouping: {
-				connect: {
-					id: Number(req.body.groupingId)
-				}
-			}
-
-		};
-
-		res.json(
-			await kernel.library.update(id, data)
-		);
+		res.json(allowed);
 
 	}
 	catch (error) {
 
-		res.status(500).json({
+		res.status(401).json({
 			error: error.message
 		});
 
 	}
 
 });
-
-router.delete("/library/:slug", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const id = await kernel.library.slugToId(req.params.slug);
-		const library = await kernel.library.get(id);
-
-		await kernel.policy.require(admin, library.course.id, "library");
-
-		await kernel.library.delete(id);
-
-		res.json({ success: true });
-
-	}
-	catch (error) {
-
-		res.status(500).json({ error: error.message });
-
-	}
-
-});
-
-// --------------------------------------------------
-// Course API
-// --------------------------------------------------
 
 router.get("/course/:slug", async (req, res) => {
 
 	try {
 
-		const admin = await kernel.auth.authenticate(getToken(req));
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
 
-		const id = await kernel.course.slugToId(req.params.slug);
-		const course = await kernel.course.get(id);
+		const courseSlug = req.params.slug;
 
-		await kernel.policy.require(admin, course.id, "course");
+		if (!kernel.admin.isAdmin(admin, courseSlug)) {
+			return res.status(403).json({
+				error: "course_access_denied"
+			});
+		}
+
+		const course = await kernel.course.get(courseSlug);
+
+		if (!course) {
+			return res.status(404).json({
+				error: "course_not_found"
+			});
+		}
 
 		res.json(course);
 
 	}
 	catch (error) {
 
-		res.status(404).json({ error: error.message });
-
-	}
-
-});
-
-router.post("/course", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		await kernel.policy.require(admin, req.body.id, "course");
-
-		res.status(201).json(await kernel.course.create(req.body));
-
-	}
-	catch (error) {
-
-		res.status(500).json({ error: error.message });
-
-	}
-
-});
-
-router.put("/course/:slug", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const id = await kernel.course.slugToId(req.params.slug);
-		const course = await kernel.course.get(id);
-
-		await kernel.policy.require(admin, course.id, "course");
-
-		res.json(await kernel.course.update(id, req.body));
-
-	}
-	catch (error) {
-
-		res.status(500).json({ error: error.message });
-
-	}
-
-});
-
-router.delete("/course/:slug", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const id = await kernel.course.slugToId(req.params.slug);
-		const course = await kernel.course.get(id);
-
-		await kernel.policy.require(admin, course.id, "course");
-
-		await kernel.course.delete(id);
-
-		res.json({ success: true });
-
-	}
-	catch (error) {
-
-		res.status(500).json({ error: error.message });
-
-	}
-
-});
-
-// --------------------------------------------------
-// Communication API
-// --------------------------------------------------
-
-router.get("/communication/unanswered/list", async (req, res) => {
-
-	try {
-
-		res.json(await kernel.communication.listUnanswered());
-
-	}
-	catch {
-
-		res.status(500).json({ error: "server_error" });
-
-	}
-
-});
-
-router.post("/communication/respond", async (req, res) => {
-
-	try {
-
-		const { id, authorResponse, isPublic } = req.body;
-
-		await kernel.communication.update(id, {
-			authorResponse,
-			isPublic
-		});
-
-		res.json({ success: true });
-
-	}
-	catch {
-
-		res.status(500).json({ error: "update_failed" });
-
-	}
-
-});
-router.get("/communication/course/:courseSlug", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const courseId = await kernel.course.slugToId(
-			req.params.courseSlug
-		);
-
-		await kernel.policy.require(
-			admin,
-			courseId,
-			"library"
-		);
-
-		res.json(
-			await kernel.communication.listUnanswered(courseId)
-		);
-
-	}
-	catch (error) {
-
-		res.status(500).json({
+		res.status(401).json({
 			error: error.message
 		});
 
 	}
 
 });
+
+// --------------------------------------------------
+// Library
+// --------------------------------------------------
+
+router.get("/course/:courseSlug/library", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
+
+		const courseSlug = req.params.courseSlug;
+
+		if (!kernel.admin.isAdmin(admin, courseSlug)) {
+			return res.status(403).json({
+				error: "course_access_denied"
+			});
+		}
+
+		res.json(
+			await kernel.library.listByCourse(courseSlug)
+		);
+
+	}
+	catch (error) {
+
+		res.status(401).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+router.get("/library/:slug", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
+
+		const item = await kernel.library.get(
+			req.params.slug
+		);
+
+		if (!item) {
+			return res.status(404).json({
+				error: "library_not_found"
+			});
+		}
+
+		if (!kernel.admin.isAdmin(admin, item.courseSlug)) {
+			return res.status(403).json({
+				error: "course_access_denied"
+			});
+		}
+
+		res.json(item);
+
+	}
+	catch (error) {
+
+		res.status(401).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+// --------------------------------------------------
+// Communication
+// --------------------------------------------------
+
+router.get("/course/:courseSlug/communication", async (req, res) => {
+
+	try {
+
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
+
+		const courseSlug = req.params.courseSlug;
+
+		if (!kernel.admin.isAdmin(admin, courseSlug)) {
+			return res.status(403).json({
+				error: "course_access_denied"
+			});
+		}
+
+		res.json(
+			await kernel.communication.listUnanswered(courseSlug)
+		);
+
+	}
+	catch (error) {
+
+		res.status(401).json({
+			error: error.message
+		});
+
+	}
+
+});
+
+// --------------------------------------------------
+// Subscription
+// --------------------------------------------------
+
 router.post("/subscription", async (req, res) => {
 
 	try {
 
-		const admin = await kernel.auth.authenticate(getToken(req));
+		const admin = await kernel.auth.authenticate(
+			getToken(req)
+		);
+
+		const courseSlug = req.body.courseSlug;
+
+		if (!kernel.admin.isAdmin(admin, courseSlug)) {
+			return res.status(403).json({
+				error: "course_access_denied"
+			});
+		}
 
 		const userId = await kernel.user.emailToId(
 			req.body.email
-		);
-
-		const courseId = await kernel.course.slugToId(
-			req.body.courseSlug
-		);
-
-		await kernel.policy.require(
-			admin,
-			courseId,
-			"subscription"
 		);
 
 		const startsAt = new Date();
@@ -440,55 +263,15 @@ router.post("/subscription", async (req, res) => {
 			endsAt.getDate() + Number(req.body.days)
 		);
 
-		res.status(201).json(
-
+		const subscription =
 			await kernel.subscription.create({
-
 				userId,
-				courseId,
+				courseSlug,
 				startsAt,
 				endsAt
+			});
 
-			})
-
-		);
-
-	}
-	catch (error) {
-
-		res.status(500).json({
-
-			error: error.message
-
-		});
-
-	}
-
-});
-
-// --------------------------------------------------
-// Grouping API
-// --------------------------------------------------
-
-router.get("/grouping", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const courseId = await kernel.course.slugToId(
-			req.query.course
-		);
-
-		await kernel.policy.require(
-			admin,
-			courseId,
-			"library"
-		);
-
-		res.json(
-			await kernel.groupings.list({ courseId })
-		);
+		res.status(201).json(subscription);
 
 	}
 	catch (error) {
@@ -501,121 +284,4 @@ router.get("/grouping", async (req, res) => {
 
 });
 
-
-router.post("/grouping", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const courseId = await kernel.course.slugToId(
-			req.body.courseSlug
-		);
-
-		await kernel.policy.require(
-			admin,
-			courseId,
-			"library"
-		);
-
-		res.status(201).json(
-
-			await kernel.groupings.create({
-
-				courseId,
-				slug: req.body.slug,
-				title: req.body.title,
-				sortOrder: req.body.sortOrder ?? 0
-
-			})
-
-		);
-
-	}
-	catch (error) {
-
-		res.status(500).json({
-			error: error.message
-		});
-
-	}
-
-});
-
-
-router.put("/grouping/:id", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const grouping = await kernel.groupings.get(
-			Number(req.params.id)
-		);
-
-		await kernel.policy.require(
-			admin,
-			grouping.courseId,
-			"library"
-		);
-
-		res.json(
-
-			await kernel.groupings.update(
-				grouping.id,
-				{
-					slug: req.body.slug,
-					title: req.body.title,
-					sortOrder: req.body.sortOrder
-				}
-			)
-
-		);
-
-	}
-	catch (error) {
-
-		res.status(500).json({
-			error: error.message
-		});
-
-	}
-
-});
-
-
-router.delete("/grouping/:id", async (req, res) => {
-
-	try {
-
-		const admin = await kernel.auth.authenticate(getToken(req));
-
-		const grouping = await kernel.groupings.get(
-			Number(req.params.id)
-		);
-
-		await kernel.policy.require(
-			admin,
-			grouping.courseId,
-			"library"
-		);
-
-		await kernel.groupings.delete(
-			grouping.id
-		);
-
-		res.json({
-			success: true
-		});
-
-	}
-	catch (error) {
-
-		res.status(500).json({
-			error: error.message
-		});
-
-	}
-
-});
 export default router;
