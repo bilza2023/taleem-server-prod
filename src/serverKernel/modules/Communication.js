@@ -1,166 +1,116 @@
-// src/serverKernel/modules/Communication.js
-
 export default class Communication {
 
 	constructor(kernel) {
 		this.kernel = kernel;
 	}
 
-	// --------------------------------------------------
-	// Queries
-	// --------------------------------------------------
-
 	async list(filters = {}) {
-
 		const where = {};
 
-		if (filters.userId) {
-			where.userId = filters.userId;
+		if (filters.courseSlug) {
+			const items = await this.kernel.db.library.findMany({
+				where: { courseSlug: filters.courseSlug },
+				select: { slug: true }
+			});
+
+			where.librarySlug = {
+				in: items.map(item => item.slug)
+			};
 		}
 
-		if (filters.libraryId) {
-			where.libraryId = filters.libraryId;
+		if (filters.librarySlug) where.librarySlug = filters.librarySlug;
+		if (filters.userId) where.userId = filters.userId;
+
+		if (filters.unanswered) {
+			where.OR = [
+				{ authorResponse: null },
+				{ authorResponse: "" }
+			];
 		}
 
 		return this.kernel.db.communication.findMany({
-			where
+			where,
+			include: { user: true },
+			orderBy: { createdAt: "desc" }
 		});
-
 	}
 
 	async get(id) {
-
-		return this.kernel.db.communication.findUnique({
-
+		const item = await this.kernel.db.communication.findUnique({
 			where: { id },
+			include: { user: true }
+		});
 
-			include: {
+		if (!item) return null;
 
-				library: {
-
-					select: {
-
-						id: true,
-						title: true,
-
-						course: {
-							select: {
-								id: true,
-								title: true
-							}
-						}
-
-					}
-
-				}
-
+		const library = await this.kernel.db.library.findUnique({
+			where: { slug: item.librarySlug },
+			select: {
+				slug: true,
+				title: true,
+				courseSlug: true
 			}
-
 		});
 
+		return {
+			...item,
+			library
+		};
 	}
 
-	// --------------------------------------------------
-	// CRUD
-	// --------------------------------------------------
-async create(data) {
-
-	try {
-		// console.log("data",data);
-		return await this.kernel.db.communication.create({
-			data
-		});
-
+	async create(data) {
+		return this.kernel.db.communication.create({ data });
 	}
-	catch (error) {
-
-		throw new Error(
-			[
-				"",
-				"========================================",
-				"COMMUNICATION CREATE FAILED",
-				"----------------------------------------",
-				`Reason : ${error.message}`,
-				"========================================"
-			].join("\n")
-		);
-
-	}
-
-}
 
 	async update(id, data) {
-
 		return this.kernel.db.communication.update({
 			where: { id },
 			data
 		});
-
 	}
 
 	async delete(id) {
-
 		return this.kernel.db.communication.delete({
 			where: { id }
 		});
-
 	}
 
-	// --------------------------------------------------
-	// Special Queries
-	// --------------------------------------------------
+	async listUnanswered(courseSlug) {
+		const items = await this.list({
+			courseSlug,
+			unanswered: true
+		});
 
-async listUnanswered(courseId) {
+		const slugs = [...new Set(items.map(item => item.librarySlug))];
 
-	return this.kernel.db.communication.findMany({
-
-		where: {
-
-			OR: [
-				{ authorResponse: null },
-				{ authorResponse: "" }
-			],
-
-			library: {
-				courseId
+		const libraries = await this.kernel.db.library.findMany({
+			where: { slug: { in: slugs } },
+			select: {
+				slug: true,
+				title: true,
+				courseSlug: true
 			}
+		});
 
-		},
+		const map = new Map(
+			libraries.map(item => [item.slug, item])
+		);
 
-		include: {
+		return items.map(item => ({
+			...item,
+			library: map.get(item.librarySlug) || null
+		}));
+	}
 
-			user: true,
-			library: true
-
-		}
-
-	});
-
+	async countUserOpenQuestions(userId) {
+		return this.kernel.db.communication.count({
+			where: {
+				userId,
+				OR: [
+					{ authorResponse: null },
+					{ authorResponse: "" }
+				]
+			}
+		});
+	}
 }
-
-
-// --------------------------------------------------
-// Count unanswered questions for one user.
-// --------------------------------------------------
-
-async countUserOpenQuestions(userId) {
-
-	return this.kernel.db.communication.count({
-
-		where: {
-
-			userId,
-
-			OR: [
-				{ authorResponse: null },
-				{ authorResponse: "" }
-			]
-
-		}
-
-	});
-
-}
-
-
-}//

@@ -230,7 +230,27 @@ router.get("/course/:courseSlug/communication", async (req, res) => {
 	}
 
 });
+router.post("/communication/respond", async (req, res) => {
+	try {
+		const admin = await kernel.auth.authenticate(getToken(req));
+		const item = await kernel.communication.get(req.body.id);
 
+		if (!item) return res.status(404).json({ error: "communication_not_found" });
+
+		if (!kernel.admin.isAdmin(admin, item.courseSlug))
+			return res.status(403).json({ error: "course_access_denied" });
+
+		await kernel.communication.update(req.body.id, {
+			authorResponse: req.body.authorResponse,
+			isPublic: Boolean(req.body.isPublic)
+		});
+
+		res.json({ success: true });
+	}
+	catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+});
 // --------------------------------------------------
 // Subscription
 // --------------------------------------------------
