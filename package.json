@@ -6,11 +6,6 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node scripts/seed-23-jul-26.js",
-    "bulk": "node scripts/bulk-seed/bulk-seed.js",
-    "wipe": "node scripts/clean-db.js",
-    "test:kernel": "npm run seed && vitest run tests/kernel",
-    "test:routes": "npm run seed && vitest run tests/routes",
     "test": "vitest"
   },
   "author": "Bilal Tariq",
@@ -20,12 +15,9 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "ejs": "^6.0.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
-    "pino": "^10.3.1",
-    "pino-http": "^11.0.0",
     "prisma": "^6.19.3",
     "sqlite3": "^6.0.1"
   },
