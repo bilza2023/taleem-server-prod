@@ -1,20 +1,21 @@
+
 // --------------------------------------------------
 // Configuration
 // --------------------------------------------------
-///home/bilal-tariq/00--TALEEM/taleem-server-prod/scripts/createCourse.js
+
 import kernel from "../src/serverKernel/ServerKernel.js";
 
-const slug = "fbise9math";
+const slug = "blog";
 
-const title = "Class 9 Math Federal Board";
+const title = "Taleem Blog";
 
 const description =
-	"Class 9 Math Federal Board. Latest Edition, the questions are being updated regularly";
+	"Articles, explanations, ideas and useful resources for students and teachers.";
 
 const thumbnail =
-	"banner.webp";
+	"blog.webp";
 
-const access = "OPEN"; // OPEN | MEMBERS | SUBSCRIPTION
+const access = "OPEN";
 
 await kernel.course.create({
 	slug,
