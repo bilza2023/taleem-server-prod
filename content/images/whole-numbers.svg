@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+
+<style>
+.title{font-family:serif;font-size:50px;fill:#d4af37;text-anchor:middle;font-weight:bold}
+.text{font-family:serif;font-size:32px;fill:white;text-anchor:middle}
+.icon{font-family:"Segoe UI Emoji";text-anchor:middle}
+</style>
+
+<!-- focus background -->
+<rect x="60" y="50" width="1080" height="800" rx="40"
+fill="#101827" fill-opacity=".8"
+stroke="#d4af37" stroke-width="3"/>
+
+<text x="600" y="120" class="title">
+Whole Numbers
+</text>
+
+<!-- quadrant boxes -->
+<g fill="#162943" stroke="#d4af37" stroke-width="2">
+<rect x="120" y="180" width="430" height="260" rx="25"/>
+<rect x="650" y="180" width="430" height="260" rx="25"/>
+<rect x="120" y="520" width="430" height="260" rx="25"/>
+<rect x="650" y="520" width="430" height="260" rx="25"/>
+</g>
+
+<!-- 1 -->
+<text x="335" y="270" class="icon" font-size="90">
+🧺 🍎🍎🍎
+</text>
+
+<text x="335" y="360" class="text">
+3 Apples
+</text>
+
+<!-- 2 -->
+<text x="865" y="270" class="icon" font-size="90">
+🧺
+</text>
+
+<text x="865" y="360" class="text">
+Nothing
+</text>
+
+<text x="865" y="405" class="text">
+0
+</text>
+
+<!-- 3 -->
+<text x="335" y="610" class="icon" font-size="80">
+🧑 ➕ 0
+</text>
+
+<text x="335" y="700" class="text">
+Nothing is still a number
+</text>
+
+<!-- 4 -->
+<text x="865" y="610" class="icon" font-size="75">
+0️⃣ 1️⃣ 2️⃣ 3️⃣
+</text>
+
+<text x="865" y="700" class="text">
+Whole Numbers
+</text>
+
+</svg>
