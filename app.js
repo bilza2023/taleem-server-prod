@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import publicRouter from "./routes/public.js";
 import adminRouter from "./routes/admin.js";
 import userRouter from "./routes/user.js";
+import kernel from "./src/serverKernel/ServerKernel.js";
 
 dotenv.config();
 
@@ -35,9 +36,22 @@ app.set("views", path.join(__dirname, "views"));
 // --------------------------------------------------
 // Content
 // --------------------------------------------------
+app.get("/api/content/images/:name", async (req, res, next) => {
+	debugger
+	const name = req.params.name;
+	if (!name.endsWith(".svg")) return next();
+
+	try {
+		const svg = await kernel.svg.get(name.replace(/\.svg$/, ""));
+		if (!svg) return res.status(404).send("SVG not found");
+		res.type("image/svg+xml").send(svg.body);
+	}
+	catch (error) {
+		next(error);
+	}
+});
 
 app.use("/api/content", express.static(CONTENT_DIR));
-
 // --------------------------------------------------
 // Public Content
 // --------------------------------------------------

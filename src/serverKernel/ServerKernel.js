@@ -1,4 +1,4 @@
-
+///home/bilal-tariq/00--TALEEM/taleem-server-prod/src/serverKernel/ServerKernel.js
 import { PrismaClient } from "@prisma/client";
 
 import Config from "./Config.js";
@@ -13,6 +13,7 @@ import Communication from "./modules/Communication.js";
 import Subscription from "./modules/Subscription.js";
 import Image from "./modules/Image.js";
 import Audio from "./modules/Audio.js";
+import Svg from "./modules/Svg.js";
 
 class ServerKernel {
 
@@ -45,48 +46,17 @@ class ServerKernel {
 			// --------------------------------------------------
 			// Modules
 			// --------------------------------------------------
+this.user = this.initialize("User", () => new User(this));
+this.admin = this.initialize("Admin", () => new Admin(this));
+this.library = this.initialize("Library", () => new Library(this));
+this.course = this.initialize("Course", () => new Course(this));
+this.image = this.initialize("Image", () => new Image(this));
+this.audio = this.initialize("Audio", () => new Audio(this));
+this.svg = this.initialize("Svg", () => new Svg(this));
+this.communication = this.initialize("Communication", () => new Communication(this));
+this.subscription = this.initialize("Subscription", () => new Subscription(this));
 
-			this.user = this.initialize(
-				"User",
-				() => new User(this)
-			);
-
-			this.admin = this.initialize(
-				"Admin",
-				() => new Admin(this)
-			);
-
-			this.library = this.initialize(
-				"Library",
-				() => new Library(this)
-			);
-
-			this.course = this.initialize(
-				"Course",
-				() => new Course(this)
-			);
-
-			this.image = this.initialize(
-				"Image",
-				() => new Image(this)
-			);
-
-			this.audio = this.initialize(
-				"Audio",
-				() => new Audio(this)
-			);
-
-			this.communication = this.initialize(
-				"Communication",
-				() => new Communication(this)
-			);
-
-			this.subscription = this.initialize(
-				"Subscription",
-				() => new Subscription(this)
-			);
-
-			this.logger.info("Server Kernel started successfully.");
+this.logger.info("Server Kernel started successfully.");
 
 		}
 		catch (error) {
