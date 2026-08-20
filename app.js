@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import publicRouter from "./routes/public.js";
 import adminRouter from "./routes/admin.js";
 import userRouter from "./routes/user.js";
-import kernel from "./src/serverKernel/ServerKernel.js";
+import kernel from "taleem-kernel";
 
 dotenv.config();
 

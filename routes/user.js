@@ -1,5 +1,5 @@
 import express from "express";
-import kernel from "../src/serverKernel/ServerKernel.js";
+import kernel from "taleem-kernel";
 
 const router = express.Router();
 
