@@ -3,7 +3,6 @@ import path from "path";
 import kernel from "taleem-kernel";
 
 export default async function addSvg(sourceDir) {
-
 	const svgDir = path.join(sourceDir, "svgs");
 
 	if (!fs.existsSync(svgDir)) {
@@ -11,34 +10,31 @@ export default async function addSvg(sourceDir) {
 	}
 
 	const files = fs.readdirSync(svgDir)
-		.filter(file => file.endsWith(".svg"));
+		.filter(file => file.endsWith(".json"));
 
 	for (const file of files) {
+		const filePath = path.join(svgDir, file);
+		const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
-		const slug = path.basename(file, ".svg");
-		const body = fs.readFileSync(
-			path.join(svgDir, file),
-			"utf8"
-		);
-
-		if (!body.trim()) {
-			throw new Error(`SVG file is empty: ${file}`);
+		if (!data.slug) throw new Error(`SVG slug missing: ${file}`);
+		if (!data.body || !data.body.trim()) {
+			throw new Error(`SVG body missing: ${file}`);
 		}
 
-		const existing = await kernel.svg.get(slug);
+		const existing = await kernel.svg.get(data.slug);
 
 		if (existing) {
-			console.log(`SVG exists: ${slug} — skipped`);
+			console.log(`SVG exists: ${data.slug} — skipped`);
 			continue;
 		}
 
 		await kernel.svg.create({
-			slug,
-			title: slug,
-			body
+			slug: data.slug,
+			title: data.title || data.slug,
+			tags: JSON.stringify(data.tags || []),
+			body: data.body
 		});
 
-		console.log(`SVG added: ${slug}`);
+		console.log(`SVG added: ${data.slug}`);
 	}
-
 }
