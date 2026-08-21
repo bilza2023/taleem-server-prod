@@ -1,45 +1,31 @@
 import path from "path";
 import PublishSchema from "taleem-specs/schema/publish";
-import loadCourse from "./componenets/loadCourse.js";
 import compileItem from "./componenets/compileItem.js";
 import trimSyllabus from "./componenets/trimSyllabus.js";
 import kernel from "taleem-kernel";
-
 import sqlAdoptor from "./componenets/SqlAdoptor.js";
 
 export default class TaleemPublish {
-	constructor(sourceDir, courseName) {
+	constructor(sourceDir, courseName, course) {
 		if (!sourceDir) throw new Error("Content library path is required");
 		if (!courseName) throw new Error("Course name is required");
+		if (!course) throw new Error("Course definition is required");
 
 		this.sourceDir = path.resolve(sourceDir);
 		this.courseName = courseName;
+		this.course = course;
 
 		this.trimSyllabus = true;
 		this.checkDecks = false;
-
-		this.courseFile = path.join(
-			this.sourceDir,
-			"courses",
-			courseName,
-			`${courseName}.json`
-		);
 
 		this.contentDir = path.join(
 			this.sourceDir,
 			"content",
 			courseName
 		);
-
-		this.course = null;
 	}
 
 	async compile() {
-		this.course = loadCourse(
-			this.courseFile,
-			this.contentDir
-		);
-
 		const compiled = {
 			course: {
 				slug: this.course.slug,
@@ -91,8 +77,8 @@ export default class TaleemPublish {
 		return PublishSchema.parse(compiled);
 	}
 
-async publish() {
-	const data = await this.compile();
-	return sqlAdoptor(kernel, data);
-}
+	async publish() {
+		const data = await this.compile();
+		return sqlAdoptor(kernel, data);
+	}
 }

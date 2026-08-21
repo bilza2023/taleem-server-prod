@@ -1,3 +1,4 @@
+
 import courses from "/home/bilal-tariq/00--TALEEM/taleem-library/courses/index.js";
 import TaleemPublish from "../src/publisher/TaleemPublish.js";
 import addSvg from "./addSvg.js";
@@ -14,7 +15,7 @@ for (const [courseName, course] of Object.entries(courses)) {
 	console.log(`========================================`);
 
 	try {
-		const publisher = new TaleemPublish(sourceDir, courseName);
+		const publisher = new TaleemPublish(sourceDir, courseName, course);
 		await publisher.publish();
 		console.log(`✓ Published ${courseName}`);
 	}
